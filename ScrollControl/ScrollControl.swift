@@ -10,14 +10,22 @@
 import UIKit
 
 
+protocol ScrollControlProtocol {
+    /// called when the user scroll's to a new item
+    func scrollControl(_ scrollControl:ScrollControl,  didSelectItem: Int)
+}
+
 /// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only.
 
 @IBDesignable class ScrollControl: UIView {
     var items: [UIView]? = nil { didSet { setup() } }
-    var currentItem: Int = 0
+    var delegate: ScrollControlProtocol? = nil
+    fileprivate var currentItem: Int = 0
     fileprivate var activeWidth: CGFloat { return self.frame.width/numOfItemsInBounds }
     fileprivate var inset: CGFloat { return (self.frame.width - activeWidth)/2 }
     fileprivate var scrollView: UIScrollView? = nil
+    /// The number of items that fit in the bounds of the scrollControl.
+    /// - example: If set to 3, one will be in focus in the center, one will fade to the left and one will fade to the right.
     @IBInspectable var numOfItemsInBounds: CGFloat = 2.0 {
         didSet {
             // set sample items for IB
@@ -28,7 +36,6 @@ import UIKit
             #endif
         }
     }
-
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -36,6 +43,10 @@ import UIKit
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    func getCurrentItem() -> Int {
+        return self.currentItem
     }
     
     func reset() {
@@ -83,9 +94,8 @@ extension ScrollControl: UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let centerTarget = targetContentOffset.pointee.x + 0.5 * scrollView.frame.width
         currentItem = Int(centerTarget/activeWidth)
-        print("offset: \(targetContentOffset.pointee.x), scrollView.width: \(scrollView.frame.width), activeWidth: \(activeWidth), centerTarget: \(centerTarget), currentItem: \(currentItem)")
         targetContentOffset.pointee.x = CGFloat(currentItem) * activeWidth - scrollView.contentInset.left
-        print("newOffset: \(targetContentOffset.pointee.x)")
+        delegate?.scrollControl(self, didSelectItem: currentItem)
     }
 }
 
