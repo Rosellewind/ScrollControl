@@ -12,6 +12,8 @@
 		23AE1B161EC4EEA400CFB968 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 23AE1B141EC4EEA400CFB968 /* Main.storyboard */; };
 		23AE1B181EC4EEA400CFB968 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23AE1B171EC4EEA400CFB968 /* Assets.xcassets */; };
 		23AE1B1B1EC4EEA400CFB968 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 23AE1B191EC4EEA400CFB968 /* LaunchScreen.storyboard */; };
+		23AE1B231EC4EECA00CFB968 /* ScrollControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AE1B221EC4EECA00CFB968 /* ScrollControl.swift */; };
+		23AE1B251EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AE1B241EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		23AE1B171EC4EEA400CFB968 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23AE1B1A1EC4EEA400CFB968 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		23AE1B1C1EC4EEA400CFB968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		23AE1B221EC4EECA00CFB968 /* ScrollControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollControl.swift; sourceTree = "<group>"; };
+		23AE1B241EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +44,7 @@
 			children = (
 				23AE1B0F1EC4EEA400CFB968 /* ScrollControl */,
 				23AE1B0E1EC4EEA400CFB968 /* Products */,
+				23AE1B241EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,9 +59,10 @@
 		23AE1B0F1EC4EEA400CFB968 /* ScrollControl */ = {
 			isa = PBXGroup;
 			children = (
+				23AE1B141EC4EEA400CFB968 /* Main.storyboard */,
 				23AE1B101EC4EEA400CFB968 /* AppDelegate.swift */,
 				23AE1B121EC4EEA400CFB968 /* ViewController.swift */,
-				23AE1B141EC4EEA400CFB968 /* Main.storyboard */,
+				23AE1B221EC4EECA00CFB968 /* ScrollControl.swift */,
 				23AE1B171EC4EEA400CFB968 /* Assets.xcassets */,
 				23AE1B191EC4EEA400CFB968 /* LaunchScreen.storyboard */,
 				23AE1B1C1EC4EEA400CFB968 /* Info.plist */,
@@ -96,6 +102,7 @@
 				TargetAttributes = {
 					23AE1B0C1EC4EEA400CFB968 = {
 						CreatedOnToolsVersion = 8.3.1;
+						DevelopmentTeam = N5W8253H8H;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -138,6 +145,8 @@
 			files = (
 				23AE1B131EC4EEA400CFB968 /* ViewController.swift in Sources */,
 				23AE1B111EC4EEA400CFB968 /* AppDelegate.swift in Sources */,
+				23AE1B251EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift in Sources */,
+				23AE1B231EC4EECA00CFB968 /* ScrollControl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -262,6 +271,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = N5W8253H8H;
 				INFOPLIST_FILE = ScrollControl/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Tanner.ScrollControl;
@@ -274,6 +284,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = N5W8253H8H;
 				INFOPLIST_FILE = ScrollControl/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Tanner.ScrollControl;
