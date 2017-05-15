@@ -37,7 +37,7 @@ protocol ScrollControlProtocol {
                 selectItem(currentItem)
             } else {
                 #if TARGET_INTERFACE_BUILDER
-                setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five")])
+                    setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five")])
                 #endif
             }
         }
@@ -45,12 +45,10 @@ protocol ScrollControlProtocol {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupScrollView()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        setupScrollView()
     }
 }
 
@@ -149,6 +147,7 @@ extension ScrollControl {
         guard items.count > 0 else { return }
         self.resetItems()
         self.items = items
+        setupScrollView()
         setupItems()
         setupGradient()
         selectItem(index)
@@ -156,6 +155,7 @@ extension ScrollControl {
     
     func resetItems() {
         items?.forEach({$0.removeFromSuperview()})
+        scrollView.removeFromSuperview()
         items = nil
         leadingConstraints = nil
         trailingConstraint = nil
@@ -168,7 +168,7 @@ extension ScrollControl {
         if item != currentItem { self.currentItem = item }
         scrollView.scrollRectToVisible(items[item].frame, animated: false)
     }
-
+    
     func appendItem(_ item: UIView) {
         insertItem(item, atIndex: items?.count ?? 0)
     }
