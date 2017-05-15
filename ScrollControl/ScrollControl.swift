@@ -15,7 +15,7 @@ protocol ScrollControlProtocol {
     func scrollControl(_ scrollControl:ScrollControl,  didSelectItem: Int)
 }
 
-/// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only.
+/// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only. Set the items after layout
 
 @IBDesignable class ScrollControl: UIView {
     var delegate: ScrollControlProtocol? = nil
