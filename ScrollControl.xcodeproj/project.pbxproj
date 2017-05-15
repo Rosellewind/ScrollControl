@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		235F75551EC8C4F100E5359F /* Swift Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235F75541EC8C4F100E5359F /* Swift Extensions.swift */; };
 		23AE1B111EC4EEA400CFB968 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AE1B101EC4EEA400CFB968 /* AppDelegate.swift */; };
 		23AE1B131EC4EEA400CFB968 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AE1B121EC4EEA400CFB968 /* ViewController.swift */; };
 		23AE1B161EC4EEA400CFB968 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 23AE1B141EC4EEA400CFB968 /* Main.storyboard */; };
@@ -18,7 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		235F75541EC8C4F100E5359F /* Swift Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Swift Extensions.swift"; sourceTree = "<group>"; };
 		23AE1B0D1EC4EEA400CFB968 /* ScrollControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScrollControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		23AE1B101EC4EEA400CFB968 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		23AE1B121EC4EEA400CFB968 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -47,7 +45,6 @@
 				23AE1B0F1EC4EEA400CFB968 /* ScrollControl */,
 				23AE1B0E1EC4EEA400CFB968 /* Products */,
 				23AE1B241EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift */,
-				235F75541EC8C4F100E5359F /* Swift Extensions.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -149,7 +146,6 @@
 				23AE1B131EC4EEA400CFB968 /* ViewController.swift in Sources */,
 				23AE1B111EC4EEA400CFB968 /* AppDelegate.swift in Sources */,
 				23AE1B251EC4EEE900CFB968 /* NSLayoutConstraint Extensions.swift in Sources */,
-				235F75551EC8C4F100E5359F /* Swift Extensions.swift in Sources */,
 				23AE1B231EC4EECA00CFB968 /* ScrollControl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
