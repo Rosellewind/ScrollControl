@@ -13,15 +13,10 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollControl.items = [UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five"), UILabel(text: "six"), UILabel(text: "seven"), UILabel(text: "eight")]
-        // Do any additional setup after loading the view, typically from a nib.
+
+        scrollControl.setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five"), UILabel(text: "six"), UILabel(text: "seven"), UILabel(text: "eight")])
+
+        scrollControl.selectItem(1)
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
 

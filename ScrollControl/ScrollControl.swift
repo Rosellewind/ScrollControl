@@ -18,56 +18,105 @@ protocol ScrollControlProtocol {
 /// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only.
 
 @IBDesignable class ScrollControl: UIView {
-    var items: [UIView]? = nil { didSet { setup() } }
     var delegate: ScrollControlProtocol? = nil
+    fileprivate var items: [UIView]? = nil
+    fileprivate var leadingConstraints: [NSLayoutConstraint]? = nil
+    fileprivate var trailingConstraint: NSLayoutConstraint? = nil
     fileprivate var currentItem: Int = 0
     fileprivate var activeWidth: CGFloat { return self.frame.width/numOfItemsInBounds }
     fileprivate var inset: CGFloat { return (self.frame.width - activeWidth)/2 }
-    fileprivate var scrollView: UIScrollView? = nil
+    fileprivate var scrollView = UIScrollView()
+    
     /// The number of items that fit in the bounds of the scrollControl.
     /// - example: If set to 3, one will be in focus in the center, one will fade to the left and one will fade to the right.
-    @IBInspectable var numOfItemsInBounds: CGFloat = 2.0 {
+    @IBInspectable var numOfItemsInBounds: CGFloat = 3 {
         didSet {
-            // set sample items for IB
-            #if TARGET_INTERFACE_BUILDER
-                items = [UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five")]
-            #else
-            setup()
-            #endif
+            if items != nil {
+                setupItems()
+                setupGradient()
+                selectItem(currentItem)
+            } else {
+                #if TARGET_INTERFACE_BUILDER
+                setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five")])
+                #endif
+            }
         }
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupScrollView()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        setupScrollView()
     }
-    
-    func getCurrentItem() -> Int {
-        return self.currentItem
-    }
-    
-    func reset() {
-        self.subviews.forEach({ $0.removeFromSuperview() })
-    }
-    
-    func setup() {
-        guard let items = items, items.count > 0 else { return }
-        reset()
+}
+
+
+// MARK: Setup
+
+extension ScrollControl {
+    fileprivate func setupScrollView() {
         
-        // setup scrollView
-        scrollView = NSLayoutConstraint.addToHorizontalScrollViewAndActivate(items: items, container: self, numOfItemsInBounds: numOfItemsInBounds)
-        scrollView!.backgroundColor = UIColor.darkGray
-        scrollView!.contentInset = UIEdgeInsets(top: 0, left: inset, bottom: 0, right: inset)
-        scrollView!.delegate = self
-        scrollView!.showsHorizontalScrollIndicator = false
+        // constraints
+        self.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(scrollView))
         self.setNeedsLayout()
         self.layoutIfNeeded()
         
+        // attributes
+        scrollView.backgroundColor = UIColor.darkGray
+        scrollView.contentInset = UIEdgeInsets(top: 0, left: inset, bottom: 0, right: inset)
+        scrollView.delegate = self
+        scrollView.showsHorizontalScrollIndicator = false
+    }
+    
+    
+    fileprivate func setupItems() {
+        assert(items != nil, "setupItems items = nil")
+        guard let items = items, let last = items.last else { return }
         
-        // setup the gradient on edges
+        // add the items, set the constant constraints
+        for item in items {
+            scrollView.addSubview(item)
+            item.translatesAutoresizingMaskIntoConstraints = false
+            let topBottom = NSLayoutConstraint.bindTopBottom(item)
+            let width = NSLayoutConstraint.equalWidthTo(item, to: self, multiplier: 1/numOfItemsInBounds)
+            let height = NSLayoutConstraint.equalHeightTo(item, to: self, multiplier: 1.0)
+            NSLayoutConstraint.activate(topBottom + [width, height])
+        }
+        
+        // set the changing constraints
+        leadingConstraints = [NSLayoutConstraint]()
+        for i in 0..<items.count {
+            let item = items[i]
+            
+            // leading
+            var leading: NSLayoutConstraint
+            if i == 0 { // bind first leading to superview
+                leading = NSLayoutConstraint.bindLeft(item)
+            } else {    // bind all others to the previous view
+                leading = NSLayoutConstraint.bindHorizontal(viewLeft: items[i-1], viewRight: item)
+            }
+            leadingConstraints!.append(leading)
+        }
+        
+        // trailing
+        trailingConstraint = NSLayoutConstraint.bindRight(last)
+        
+        // activate
+        NSLayoutConstraint.activate(leadingConstraints! + [trailingConstraint!])
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+    }
+    
+    fileprivate func setupGradient() {
+        assert(items != nil, "setupGradient items = nil")
+        guard let items = items else { return }
+        
         let gradient = CAGradientLayer()
         gradient.frame = self.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0.5)
@@ -79,16 +128,149 @@ protocol ScrollControlProtocol {
         gradient.locations = [0, NSNumber(value: Float(leftStop)), NSNumber(value: Float(rightStop)), 1.0]
         self.layer.mask = gradient
         
-        // select the initial item
-        selectItem(0)
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+    }
+}
+
+// MARK: Item Management (Public methods)
+
+extension ScrollControl {
+    
+    func getCurrentItem() -> Int {
+        return self.currentItem
+    }
+    
+    func getItems() -> [UIView]? {
+        return self.items
+    }
+    
+    func setItems(_ items: [UIView], selectIndex index: Int = 0) {
+        guard items.count > 0 else { return }
+        self.resetItems()
+        self.items = items
+        setupItems()
+        setupGradient()
+        selectItem(index)
+    }
+    
+    func resetItems() {
+        items?.forEach({$0.removeFromSuperview()})
+        items = nil
+        leadingConstraints = nil
+        trailingConstraint = nil
+        currentItem = 0
     }
     
     func selectItem(_ item: Int) {
-        guard let items = items, item < items.count, let scrollView = scrollView else { return }
-        self.currentItem = item
+        assert(items != nil && item >= 0 && item < items!.count, "selectItem out of bounds")
+        guard let items = items, item < items.count, item >= 0 else { return }
+        if item != currentItem { self.currentItem = item }
         scrollView.scrollRectToVisible(items[item].frame, animated: false)
     }
+
+    func appendItem(_ item: UIView) {
+        insertItem(item, atIndex: items?.count ?? 0)
+    }
+    
+    func insertItem(_ item: UIView, atIndex index: Int) {
+        assert((items == nil && index == 0) || (items != nil && index >= 0 && index <= items!.count), "insertItem out of bounds")
+        guard let items = items, items.count > 0 else {
+            setItems([item])
+            return
+        }
+        guard index <= items.count, index >= 0, let leadingConstraints = leadingConstraints, leadingConstraints.count == items.count, let trailingConstraint = trailingConstraint else { return }
+        
+        let isFirst = index == 0
+        let isLast = index == items.count
+        
+        // add the items, set the constant constraints
+        scrollView.insertSubview(item, at: index)
+        item.translatesAutoresizingMaskIntoConstraints = false
+        let topBottom = NSLayoutConstraint.bindTopBottom(item)
+        let width = NSLayoutConstraint.equalWidthTo(item, to: self, multiplier: 1/numOfItemsInBounds)
+        let height = NSLayoutConstraint.equalHeightTo(item, to: self, multiplier: 1.0)
+        NSLayoutConstraint.activate(topBottom + [width, height])
+        
+        // trailing constraint, replace
+        let oldTrailing: NSLayoutConstraint
+        let trailing: NSLayoutConstraint
+        if isLast {
+            oldTrailing = trailingConstraint
+            trailing = NSLayoutConstraint.bindRight(item)
+            self.trailingConstraint! = trailing
+        } else {
+            oldTrailing = leadingConstraints[index]
+            trailing = NSLayoutConstraint.bindHorizontal(viewLeft: item, viewRight: items[index])
+            self.leadingConstraints![index] = trailing
+        }
+        
+        // leading constraint, insert new
+        let leading: NSLayoutConstraint
+        if isFirst {
+            leading = NSLayoutConstraint.bindLeft(item)
+        } else {
+            leading = NSLayoutConstraint.bindHorizontal(viewLeft: items[index - 1], viewRight: item)
+        }
+        self.leadingConstraints!.insert(leading, at: index)
+        
+        self.items!.insert(item, at: index)
+        NSLayoutConstraint.deactivate([oldTrailing])
+        NSLayoutConstraint.activate([leading, trailing])
+        
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+    }
+    
+    func removeItem(index: Int) -> UIView? {
+        assert(items != nil && index >= 0 && index < items!.count, "removeItem out of bounds")
+        guard let items = items, items.count > 0, index < items.count else { return nil }
+        guard let leadingConstraints = leadingConstraints, leadingConstraints.count == items.count, let trailingConstraint = trailingConstraint else { print("removeItem constraints issue"); return nil }////throw
+        if items.count == 1 {
+            if index == 0 {
+                let item = items[0]
+                item.removeFromSuperview()
+                self.items = nil
+                return item
+            } else {
+                return nil
+            }
+        }
+        
+        let isFirst = index == 0
+        let isLast = index == items.count - 1
+        
+        let oldLeading = self.leadingConstraints!.remove(at: index)
+        let oldTrailing: NSLayoutConstraint
+        let trailing: NSLayoutConstraint
+        if isFirst {
+            oldTrailing = leadingConstraints[0]
+            trailing = NSLayoutConstraint.bindLeft(items[1])
+            self.leadingConstraints![0] = trailing
+        } else if isLast {
+            oldTrailing = trailingConstraint
+            trailing = NSLayoutConstraint.bindRight(items[index - 1])
+            self.trailingConstraint! = trailing
+        } else {
+            oldTrailing = leadingConstraints[index]
+            trailing = NSLayoutConstraint.bindHorizontal(viewLeft: items[index - 1], viewRight: items[index + 1])
+            self.leadingConstraints![index] = trailing
+        }
+        NSLayoutConstraint.deactivate([oldLeading, oldTrailing])
+        NSLayoutConstraint.activate([trailing])
+        
+        let item = self.items!.remove(at: index)
+        item.removeFromSuperview()
+        
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        
+        return item
+    }
 }
+
+
+// MARK: UIScrollViewDelegate Methods
 
 extension ScrollControl: UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {

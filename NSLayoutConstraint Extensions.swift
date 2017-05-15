@@ -71,6 +71,18 @@ extension NSLayoutConstraint {
         return bindTopBottom(view) + bindLeftRight(view)
     }
     
+    class func bindHorizontal(viewLeft: UIView, viewRight: UIView) -> NSLayoutConstraint  {
+        let horizontal = NSLayoutConstraint(item: viewLeft, attribute: .trailing, relatedBy: .equal, toItem: viewRight, attribute: .leading, multiplier: 1, constant: 0)
+        horizontal.identifier = "bindHorizontal"
+        return horizontal
+    }
+    
+    class func bindVertical(topView: UIView, bottomView: UIView) -> NSLayoutConstraint  {
+        let vertical = NSLayoutConstraint(item: topView, attribute: .bottom, relatedBy: .equal, toItem: bottomView, attribute: .top, multiplier: 1, constant: 0)
+        vertical.identifier = "bindVertical"
+        return vertical
+    }
+    
     /// constraints that bind the top, left and right to the superview, and constrains the height to the topLayoutGuide height
     ///
     /// - parameters:
@@ -157,6 +169,25 @@ extension NSLayoutConstraint {
         return widths + heights
     }
     
+    
+    class func equalWidthTo(_ view: UIView, to referenceView: UIView, multiplier: CGFloat) -> NSLayoutConstraint {
+        let width = NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: referenceView, attribute: .width, multiplier: multiplier, constant: 0)
+        width.identifier = "equalWidthTo"
+        return width
+    }
+    
+    class func equalHeightTo(_ view: UIView, to referenceView: UIView, multiplier: CGFloat) -> NSLayoutConstraint {
+        let height = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: referenceView, attribute: .height, multiplier: multiplier, constant: 0)
+        height.identifier = "equalHeightTo"
+        return height
+    }
+    
+    class func equalWidthHeightTo(_ view: UIView, to referenceView: UIView, multiplier: CGFloat) -> [NSLayoutConstraint] {
+        let width = equalWidthTo(view, to: referenceView, multiplier:multiplier)
+        let height = equalHeightTo(view, to: referenceView, multiplier: multiplier)
+        return [width, height]
+    }
+    
     class func equalWidthsTo(_ views: [UIView], to referenceView: UIView, multiplier: CGFloat) -> [NSLayoutConstraint] {
         var constraints = [NSLayoutConstraint]()
         for view in views {
@@ -192,13 +223,12 @@ extension NSLayoutConstraint {
                 leading = NSLayoutConstraint(item: view, attribute: .leading, relatedBy: .equal, toItem: views[i-1], attribute: .trailing, multiplier: 1, constant: 0)
                 leading.identifier = "bindHorizontally.leading"
             }
-            leading.identifier = "...leading i: \(i)"
             constraints.append(leading)
         }
         
         if views.last != nil {
             let trailing = NSLayoutConstraint(item: views.last!, attribute: .trailing, relatedBy: .equal, toItem: views.last!.superview, attribute: .trailing, multiplier: 1, constant: 0)
-            trailing.identifier = "bindHorizontally.trailing count: \(views.count)"
+            trailing.identifier = "bindHorizontally.trailing.last"
             constraints.append(trailing)
         }
         
@@ -239,7 +269,7 @@ extension NSLayoutConstraint {
         return constraints
     }
     
-    class func addToHorizontalScrollViewAndActivate(items: [UIView], container: UIView, numOfItemsInBounds: CGFloat) -> UIScrollView {
+    class func makeHorizontalScrollViewAndActivate(items: [UIView], container: UIView, numOfItemsInBounds: CGFloat) -> UIScrollView {
         
         // make a scrollview
         let scrollView = UIScrollView()
