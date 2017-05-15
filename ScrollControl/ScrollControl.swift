@@ -163,7 +163,7 @@ extension ScrollControl {
     }
     
     func selectItem(_ item: Int) {
-        assert(items != nil && item >= 0 && item < items!.count, "selectItem out of bounds")
+        assert(items == nil || (items != nil && item >= 0 && item < items!.count), "selectItem out of bounds")
         guard let items = items, item < items.count, item >= 0 else { return }
         if item != currentItem { self.currentItem = item }
         scrollView.scrollRectToVisible(items[item].frame, animated: false)
@@ -229,8 +229,7 @@ extension ScrollControl {
         if items.count == 1 {
             if index == 0 {
                 let item = items[0]
-                item.removeFromSuperview()
-                self.items = nil
+                resetItems()
                 return item
             } else {
                 return nil
