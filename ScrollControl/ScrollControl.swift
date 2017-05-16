@@ -46,10 +46,12 @@ protocol ScrollControlProtocol {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        addTap()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        addTap()
     }
 }
 
@@ -120,9 +122,8 @@ extension ScrollControl {
     }
     
     fileprivate func setupGradient() {
-        assert(items != nil, "setupGradient items = nil")
-        guard let items = items else { return }
         
+        // layout
         let gradient = CAGradientLayer()
         gradient.frame = self.bounds
         gradient.startPoint = CGPoint(x: 0, y: 0.5)
@@ -159,7 +160,7 @@ extension ScrollControl {
     }
     
     func setItems(_ items: [UIView], andSelectIndex index: Int = 0) {
-        self.resetItemsAndConstraints()
+        self.resetItems()
         self.items = items
         setupAll()
         if items.count > 0 {
@@ -168,17 +169,17 @@ extension ScrollControl {
     }
     
 
-    func resetItemsAndConstraints() {
+    func resetItems() {
         resetConstraints()
         items = nil
         currentItemIndex = 0
     }
     
-    func selectItem(atIndex index: Int) {
+    func selectItem(atIndex index: Int, animated: Bool = false) {
         assert(items == nil || (items != nil && index >= 0 && index < items!.count), "selectItem out of bounds")
         guard let items = items, index < items.count, index >= 0 else { return }
         if index != currentItemIndex { self.currentItemIndex = index }
-        scrollView.scrollRectToVisible(items[index].frame, animated: false)
+        scrollView.scrollRectToVisible(items[index].frame, animated: animated)
     }
     
     func appendItem(_ item: UIView) {
@@ -241,7 +242,7 @@ extension ScrollControl {
         if items.count == 1 {
             if index == 0 {
                 let item = items[0]
-                resetItemsAndConstraints()
+                resetItems()
                 return item
             } else {
                 return nil
@@ -281,7 +282,36 @@ extension ScrollControl {
 }
 
 
-// MARK: UIScrollViewDelegate Methods
+// MARK: Tap to move left/right
+
+extension ScrollControl {
+    
+    fileprivate func addTap() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        self.addGestureRecognizer(tap)
+    }
+    
+    func tapped(_ sender: UITapGestureRecognizer) {
+        guard let items = items, items.count > 0 else { return }
+        let x = sender.location(in: self).x
+        let isLeftSide = x < inset
+        let isRightSide = x > self.frame.width - inset
+        if isLeftSide {
+            let index = currentItemIndex - 1
+            if index >= 0 {
+                self.selectItem(atIndex: index, animated: true)
+            }
+        } else if isRightSide {
+            let index = currentItemIndex + 1
+            if index < items.count {
+                self.selectItem(atIndex: index, animated: true)
+            }
+        }
+    }
+}
+
+
+// MARK: UIScrollViewDelegate
 
 extension ScrollControl: UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {

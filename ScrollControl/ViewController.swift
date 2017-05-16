@@ -13,13 +13,8 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollControl.setItems([])
-//        scrollControl.insertItem(UILabel(text: "one"), atIndex: 0)
-//        scrollControl.removeItem(atIndex: 0)
-//
-//        scrollControl.insertItem(UILabel(text: "he"), atIndex: 0)
         
-//        scrollControl.setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five"), UILabel(text: "six"), UILabel(text: "seven"), UILabel(text: "eight")], andSelectIndex: 1)
+        scrollControl.setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five"), UILabel(text: "six"), UILabel(text: "seven"), UILabel(text: "eight")], andSelectIndex: 1)
     }
 }
 
