@@ -11,18 +11,18 @@ import UIKit
 
 
 protocol ScrollControlProtocol {
-    /// called when the user scroll's to a new item
+    /// called when the user scrolls to a new item
     func scrollControl(_ scrollControl:ScrollControl,  didSelectItem: Int)
 }
 
-/// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only. Set the items after layout
+/// Swipe back and forth horizontally to see/select different UIView's. To use, set the items property after layout.  The view fades to the right and left, leaving the selection in focus in the middle. Sample items will be shown in interface builder only.
 
 @IBDesignable class ScrollControl: UIView {
     var delegate: ScrollControlProtocol? = nil
     fileprivate var items: [UIView]? = nil
     fileprivate var leadingConstraints: [NSLayoutConstraint]? = nil
     fileprivate var trailingConstraint: NSLayoutConstraint? = nil
-    fileprivate var currentItem: Int = 0
+    fileprivate var currentItemIndex: Int = 0
     fileprivate var activeWidth: CGFloat { return self.frame.width/numOfItemsInBounds }
     fileprivate var inset: CGFloat { return (self.frame.width - activeWidth)/2 }
     fileprivate var scrollView = UIScrollView()
@@ -32,9 +32,10 @@ protocol ScrollControlProtocol {
     @IBInspectable var numOfItemsInBounds: CGFloat = 3 {
         didSet {
             if items != nil {
-                setupItems()
-                setupGradient()
-                selectItem(currentItem)
+                setupAll()
+                if items!.count > 0 {
+                    selectItem(atIndex: currentItemIndex)
+                }
             } else {
                 #if TARGET_INTERFACE_BUILDER
                     setItems([UILabel(text: "one"), UILabel(text: "two"), UILabel(text: "three"), UILabel(text: "four"), UILabel(text: "five")])
@@ -56,6 +57,13 @@ protocol ScrollControlProtocol {
 // MARK: Setup
 
 extension ScrollControl {
+    fileprivate func setupAll() {
+        resetConstraints()
+        setupScrollView()
+        setupItems()
+        setupGradient()
+    }
+    
     fileprivate func setupScrollView() {
         
         // constraints
@@ -120,7 +128,7 @@ extension ScrollControl {
         gradient.startPoint = CGPoint(x: 0, y: 0.5)
         gradient.endPoint = CGPoint(x: 1.0, y: 0.5)
         gradient.colors = [UIColor.clear.cgColor, UIColor.white.cgColor, UIColor.white.cgColor, UIColor.clear.cgColor]
-        let viewInset = (self.frame.width - items[0].frame.width)/2
+        let viewInset = inset
         let leftStop = viewInset/self.frame.width
         let rightStop = 1 - leftStop
         gradient.locations = [0, NSNumber(value: Float(leftStop)), NSNumber(value: Float(rightStop)), 1.0]
@@ -129,44 +137,48 @@ extension ScrollControl {
         self.setNeedsLayout()
         self.layoutIfNeeded()
     }
+    
+    func resetConstraints() {
+        items?.forEach({$0.removeFromSuperview()})
+        scrollView.removeFromSuperview()
+        leadingConstraints = nil
+        trailingConstraint = nil
+    }
 }
 
 // MARK: Item Management (Public methods)
 
 extension ScrollControl {
     
-    func getCurrentItem() -> Int {
-        return self.currentItem
+    func getCurrentItemIndex() -> Int {
+        return self.currentItemIndex
     }
     
     func getItems() -> [UIView]? {
         return self.items
     }
     
-    func setItems(_ items: [UIView], selectIndex index: Int = 0) {
-        guard items.count > 0 else { return }
-        self.resetItems()
+    func setItems(_ items: [UIView], andSelectIndex index: Int = 0) {
+        self.resetItemsAndConstraints()
         self.items = items
-        setupScrollView()
-        setupItems()
-        setupGradient()
-        selectItem(index)
+        setupAll()
+        if items.count > 0 {
+            selectItem(atIndex: index)
+        }
     }
     
-    func resetItems() {
-        items?.forEach({$0.removeFromSuperview()})
-        scrollView.removeFromSuperview()
+
+    func resetItemsAndConstraints() {
+        resetConstraints()
         items = nil
-        leadingConstraints = nil
-        trailingConstraint = nil
-        currentItem = 0
+        currentItemIndex = 0
     }
     
-    func selectItem(_ item: Int) {
-        assert(items == nil || (items != nil && item >= 0 && item < items!.count), "selectItem out of bounds")
-        guard let items = items, item < items.count, item >= 0 else { return }
-        if item != currentItem { self.currentItem = item }
-        scrollView.scrollRectToVisible(items[item].frame, animated: false)
+    func selectItem(atIndex index: Int) {
+        assert(items == nil || (items != nil && index >= 0 && index < items!.count), "selectItem out of bounds")
+        guard let items = items, index < items.count, index >= 0 else { return }
+        if index != currentItemIndex { self.currentItemIndex = index }
+        scrollView.scrollRectToVisible(items[index].frame, animated: false)
     }
     
     func appendItem(_ item: UIView) {
@@ -222,14 +234,14 @@ extension ScrollControl {
         self.layoutIfNeeded()
     }
     
-    func removeItem(index: Int) -> UIView? {
+    func removeItem(atIndex index: Int) -> UIView? {
         assert(items != nil && index >= 0 && index < items!.count, "removeItem out of bounds")
         guard let items = items, items.count > 0, index < items.count else { return nil }
         guard let leadingConstraints = leadingConstraints, leadingConstraints.count == items.count, let trailingConstraint = trailingConstraint else { print("removeItem constraints issue"); return nil }////throw
         if items.count == 1 {
             if index == 0 {
                 let item = items[0]
-                resetItems()
+                resetItemsAndConstraints()
                 return item
             } else {
                 return nil
@@ -274,9 +286,9 @@ extension ScrollControl {
 extension ScrollControl: UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let centerTarget = targetContentOffset.pointee.x + 0.5 * scrollView.frame.width
-        currentItem = Int(centerTarget/activeWidth)
-        targetContentOffset.pointee.x = CGFloat(currentItem) * activeWidth - scrollView.contentInset.left
-        delegate?.scrollControl(self, didSelectItem: currentItem)
+        currentItemIndex = Int(centerTarget/activeWidth)
+        targetContentOffset.pointee.x = CGFloat(currentItemIndex) * activeWidth - scrollView.contentInset.left
+        delegate?.scrollControl(self, didSelectItem: currentItemIndex)
     }
 }
 
@@ -285,5 +297,6 @@ extension UILabel {
         self.init(frame: CGRect.zero)
         self.text = text
         self.textAlignment = .center
+        self.textColor = .white
     }
 }
