@@ -151,7 +151,7 @@ extension ScrollControl {
 
 extension ScrollControl {
     
-    func getCurrentItemIndex() -> Int {
+    func getSelectedItemIndex() -> Int {
         return self.selectedItemIndex
     }
     
