@@ -22,7 +22,7 @@ protocol ScrollControlProtocol {
     fileprivate var items: [UIView]? = nil
     fileprivate var leadingConstraints: [NSLayoutConstraint]? = nil
     fileprivate var trailingConstraint: NSLayoutConstraint? = nil
-    fileprivate var currentItemIndex: Int = 0
+    fileprivate var selectedItemIndex: Int = 0
     fileprivate var activeWidth: CGFloat { return self.frame.width/numOfItemsInBounds }
     fileprivate var inset: CGFloat { return (self.frame.width - activeWidth)/2 }
     fileprivate var scrollView = UIScrollView()
@@ -34,7 +34,7 @@ protocol ScrollControlProtocol {
             if items != nil {
                 setupAll()
                 if items!.count > 0 {
-                    selectItem(atIndex: currentItemIndex)
+                    selectItem(atIndex: selectedItemIndex)
                 }
             } else {
                 #if TARGET_INTERFACE_BUILDER
@@ -152,7 +152,7 @@ extension ScrollControl {
 extension ScrollControl {
     
     func getCurrentItemIndex() -> Int {
-        return self.currentItemIndex
+        return self.selectedItemIndex
     }
     
     func getItems() -> [UIView]? {
@@ -172,13 +172,13 @@ extension ScrollControl {
     func resetItems() {
         resetConstraints()
         items = nil
-        currentItemIndex = 0
+        selectedItemIndex = 0
     }
     
     func selectItem(atIndex index: Int, animated: Bool = false) {
         assert(items == nil || (items != nil && index >= 0 && index < items!.count), "selectItem out of bounds")
         guard let items = items, index < items.count, index >= 0 else { return }
-        if index != currentItemIndex { self.currentItemIndex = index }
+        if index != selectedItemIndex { self.selectedItemIndex = index }
         scrollView.scrollRectToVisible(items[index].frame, animated: animated)
     }
     
@@ -297,12 +297,12 @@ extension ScrollControl {
         let isLeftSide = x < inset
         let isRightSide = x > self.frame.width - inset
         if isLeftSide {
-            let index = currentItemIndex - 1
+            let index = selectedItemIndex - 1
             if index >= 0 {
                 self.selectItem(atIndex: index, animated: true)
             }
         } else if isRightSide {
-            let index = currentItemIndex + 1
+            let index = selectedItemIndex + 1
             if index < items.count {
                 self.selectItem(atIndex: index, animated: true)
             }
@@ -316,9 +316,9 @@ extension ScrollControl {
 extension ScrollControl: UIScrollViewDelegate {
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let centerTarget = targetContentOffset.pointee.x + 0.5 * scrollView.frame.width
-        currentItemIndex = Int(centerTarget/activeWidth)
-        targetContentOffset.pointee.x = CGFloat(currentItemIndex) * activeWidth - scrollView.contentInset.left
-        delegate?.scrollControl(self, didSelectItem: currentItemIndex)
+        selectedItemIndex = Int(centerTarget/activeWidth)
+        targetContentOffset.pointee.x = CGFloat(selectedItemIndex) * activeWidth - scrollView.contentInset.left
+        delegate?.scrollControl(self, didSelectItem: selectedItemIndex)
     }
 }
 
